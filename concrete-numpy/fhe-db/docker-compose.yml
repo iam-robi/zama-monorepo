@@ -1,0 +1,17 @@
+version: '3'
+services:
+  concrete-numpy:
+    container_name: concrete-numpy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # command: /bin/bash
+    ports:
+      - "8888:8888"
+    volumes:
+      - $PWD/notebooks:/data
+    tty: true
+    stdin_open: true
+
+
+  
