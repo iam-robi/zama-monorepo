@@ -2,7 +2,7 @@ use tfhe::boolean::prelude::*;
 
 pub fn booltest() {
     println!("booltest");
-    let (client_key, server_key) = gen_keys();
+    let (client_key, server_key) : (ClientKey, ServerKey) = gen_keys();
 
     let ct_1 = client_key.encrypt(true);
     let ct_2 = client_key.encrypt(false);

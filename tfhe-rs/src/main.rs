@@ -1,14 +1,18 @@
 use structopt::StructOpt;
 use booltest::booltest;
 use shortinttest::shortinttest;
+use keygen::keygen;
+
 mod booltest;
 mod shortinttest;
+mod keygen;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "tests")]
 enum Command {
     BoolTest,
     IntTest,
+    Keygen
 }
 
 fn main() {
@@ -17,7 +21,8 @@ fn main() {
     match command {
         Command::BoolTest => booltest(),
         Command::IntTest => shortinttest(),
-    }
+        Command::Keygen => keygen()
+        }
 }
 
 // fn booltest() {
