@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "@pinia/nuxt": "^0.4.2",
+    "nuxt": "^3.3.1",
+    "@nuxt/ui": "^0.3.3"
+  },
+  "dependencies": {
+    "tfhe": "^0.2.0",
+    "tfhe-web": "^0.2.0"
+  }
+}
