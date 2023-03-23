@@ -10,6 +10,9 @@ export const useKeys = defineStore("keys", {
     sks: null,
     serialized_cks: null, 
     serialized_sks: null,
+    cyphertext: null,
+    result: null,
+    result_ct: null,
   }),
   actions: {
     async writeToFile() {

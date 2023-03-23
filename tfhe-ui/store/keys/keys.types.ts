@@ -8,6 +8,10 @@ export interface KeysState {
     sks: null |BooleanPublicKey |ShortintPublicKey;
     serialized_cks: null | SerializedClientKey ;
     serialized_sks: null | SerializedServerKey ;
+    cyphertext: any;
+    result: any;
+    // result_ct: cyphertext result from operation
+    result_ct: any;
 }
 
 
