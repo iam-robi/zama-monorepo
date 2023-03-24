@@ -3,6 +3,7 @@ use booltest::booltest;
 use shortinttest::shortinttest;
 use keygen::keygen;
 use keygenjson::keygenjson;
+use bincode;
 
 mod booltest;
 mod shortinttest;
