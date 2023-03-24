@@ -18,7 +18,9 @@
       <!-- <button class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button> -->
       </div>
     </div>
-
+    <div class="encryption-container">
+      <button @click="addToItself" class="encrypt-btn">Send</button>
+    </div>
     </div>
   </div>
 
@@ -27,9 +29,6 @@
 <script setup>
 import { useKeys } from "~/store/keys/keys.index";
 import useEncodeArray from "~/composables/useEncodeArray";
-
-// const { encodeArray } = useEncodeArray();
-console.log("encode array", useEncodeArray([8,9]));
 
 const keysStore = useKeys();
 //Operated by client
@@ -51,7 +50,7 @@ const encrypt = async () => {
 }
 //Operated by server
 const addToItself = async () => {
-  await $fetch('/api/operation/add', { method: 'POST', body: { cks: keysStore.serialized_cks , cyphertext: keysStore.cyphertext} } ).then((res) => 
+  await $fetch('http://localhost:8000/submit', { method: 'POST', body: { sks: keysStore.serialized_cks , cyphertext: keysStore.cyphertext} } ).then((res) => 
   { 
     console.log(res)
     keysStore.result_ct = res.cyphertext

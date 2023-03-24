@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct DataForAddition {
-    pub ciphertext: Vec<u8>,
-    pub public_key: Vec<u8>,
+    pub cyphertext: Vec<u8>,
+    pub sks: Vec<u8>,
 }
 
 #[derive(Deserialize, Serialize)]

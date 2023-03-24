@@ -18,11 +18,11 @@ mod models {
     pub mod tfhe;
 }
 
-use api::routes::{index, submit};
+use api::routes::{index, submit, submit_options};
 use middleware::cors::CORS;
 
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().attach(CORS).mount("/", routes![index])
+    rocket::build().attach(CORS).mount("/", routes![index, submit, submit_options])
 }
