@@ -6,7 +6,7 @@
     <button @click="keygen" class="generate-key-btn">Generate Key</button>
     <div class="key-container">
       <div class="key-box blurred">{{ keysStore.serialized_cks }}</div>
-      <button class="download-btn">Download</button>
+      <button  @click="download(keysStore.serialized_cks)" class="download-btn">Download</button>
     </div>
     <div class="encryption-container">
       <input type="number" v-model="keysStore.message" class="number-input" />
@@ -29,7 +29,7 @@
 <script setup>
 import { useKeys } from "~/store/keys/keys.index";
 import useEncodeArray from "~/composables/useEncodeArray";
-
+import useRevertString from "~/composables/useRevertString";
 const keysStore = useKeys();
 //Operated by client
 const keygen = async () => {
@@ -50,7 +50,9 @@ const encrypt = async () => {
 }
 //Operated by server
 const addToItself = async () => {
-  await $fetch('http://localhost:8000/submit', { method: 'POST', body: { sks: keysStore.serialized_cks , cyphertext: keysStore.cyphertext} } ).then((res) => 
+  await $fetch('http://localhost:8000/submit', { method: 'POST', body: { sks: keysStore.serialized_cks , cyphertext: keysStore.cyphertext},  headers: {
+    'Content-Type': 'application/json',
+  } } ).then((res) => 
   { 
     console.log(res)
     keysStore.result_ct = res.cyphertext
@@ -71,6 +73,28 @@ onMounted(async () => {
     console.log(res)
   })
 });
+
+const download = (arr) => {
+      
+      // Convert uint8 array to base64 encoded string
+      const base64String = btoa(String.fromCharCode.apply(null, arr));
+
+      // Create a Blob object with the base64-encoded string as its content
+      const mimeType = 'application/octet-stream';
+      const blob = new Blob([atob(base64String)], { type: mimeType });
+
+      // Generate a URL for the Blob object
+      const url = URL.createObjectURL(blob);
+
+      // Trigger the download using an anchor element with the `download` attribute
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'key.txt';
+      anchor.click();
+
+      // Clean up the URL object after download
+      URL.revokeObjectURL(url);
+}
 
 </script>
 <style scoped>
@@ -176,3 +200,5 @@ input {
 
 
 </style>
+
+
