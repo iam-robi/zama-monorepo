@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket = { version = "0.5.0-rc.2", features = ["secrets"] }
+rocket = { version = "0.5.0-rc.2", features = ["secrets","json"] }
 rocket_cors = "0.5.1"
 tfhe = { version = "0.1.11", features = [ "boolean", "shortint", "aarch64-unix" ] }
+serde = { version = "1.0.130", features = ["derive"] }
