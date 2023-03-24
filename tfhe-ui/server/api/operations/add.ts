@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
     let sks = Shortint.new_compressed_server_key(deserialized_cks);
     let ct = body.ct;
     let fake_result_ct = [0,8,0,3];
-    //TODO: support for sks.unchecked_add(sks, ct, ct) or run rust webserver
+    //TODO: support for sks.unchecked_add(sks, ct, ct) or run rust webserver 
 
     return {
       cyphertext: Object.freeze(Array.from(fake_result_ct)),
