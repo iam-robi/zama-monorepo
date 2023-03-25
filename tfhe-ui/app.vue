@@ -8,11 +8,14 @@
       <div class="key-box blurred">{{ keysStore.serialized_cks }}</div>
       <button  @click="download(keysStore.serialized_cks)" class="download-btn">Download</button>
     </div>
+    <br>
+    <h1 style="font-weight:900 ;">Value 1</h1>
     <div class="encryption-container">
+      
       <input type="number" v-model="keysStore.message" class="number-input" />
       <button @click="encrypt" class="encrypt-btn">Encrypt</button>
     </div>
-    <div >Encrypted value:
+    <div > <br> <span style="font-style: italic;">Encrypted value:</span>
       <div class="pre-container">
       <pre id="preElement" class="encrypted-value"> {{ useEncodeArray(keysStore.cyphertext).base64String }}</pre></div>
       <!-- <button class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button> -->
@@ -50,7 +53,17 @@ const encrypt = async () => {
 }
 //Operated by server
 const addToItself = async () => {
-  await $fetch('http://localhost:8000/submit', { method: 'POST', body: { sks: keysStore.serialized_cks , cyphertext: keysStore.cyphertext},  headers: {
+
+  const serverkey = await $fetch('/api/serverkey', { method: 'POST', body: { cks: keysStore.serialized_cks} } ).then((res) => 
+  {
+    console.log("serverkey generated")
+    return res
+  }
+  )
+
+  console.log(serverkey)
+
+  await $fetch('http://localhost:8000/submit', { method: 'POST', body: { sks: serverkey.sks , cyphertext: keysStore.cyphertext},  headers: {
     'Content-Type': 'application/json',
   } } ).then((res) => 
   { 
