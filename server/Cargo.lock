@@ -1520,6 +1520,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_bytes"
+version = "0.11.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "416bda436f9aab92e02c8e10d49a15ddd339cea90b6e340fe51ed97abb548294"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "serde_derive"
 version = "1.0.157"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1549,6 +1558,7 @@ dependencies = [
  "rocket 0.5.0-rc.2",
  "rocket_cors",
  "serde",
+ "serde_bytes",
  "tfhe",
 ]
 

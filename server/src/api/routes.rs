@@ -1,14 +1,12 @@
-use rocket::serde::{Deserialize, Serialize};
-use rocket::serde::json::Json;
+use rocket::serde::{json::Json};
 use crate::models::tfhe::{AdditionResponse, DataForAddition};
 use rocket::http::{ContentType, Status};
 use tfhe::shortint::prelude::*;
 use bincode;
 use std::io::Cursor;
-use std::any::Any;
-use rocket::response::{self, Responder, Response};
-use std::fmt::{self, Display};
 
+use rocket::response::{Responder, Response};
+use std::fmt::{self};
 
 #[derive(Debug)]
 pub struct CustomError(Box<dyn std::error::Error + Send + Sync>);
@@ -46,6 +44,7 @@ impl<'r> Responder<'r, 'static> for CustomError {
 
 #[get("/")]
 pub fn index() -> &'static str {
+    println!("Response: {:?}", "hey");
     "Front end can query!"
 }
 #[options("/submit")]
@@ -54,21 +53,23 @@ pub fn submit_options() -> Status {
 }
 #[post("/submit", format = "json", data = "<data>")]
 pub async fn submit(data: Json<DataForAddition>) -> Result<Json<AdditionResponse>, CustomError>   {
-
-    println!("Received data: {:?}", data);
+    println!("Response: {:?}", "1");
     let mut serialized_data = Cursor::new(&data.sks);
+    println!("Response: {:?}", "2");
     let server_key: ServerKey = bincode::deserialize_from(&mut serialized_data)?;
-    // if data.ciphertext.len() > 38864 {
-    //     return Err("Ciphertext is too large.".to_string());
-    // }
-
-    // if data.public_key.len() > 24395904 {
-    //     return Err("Public key is too large.".to_string());
-    // }
-
+    println!("Response: {:?}", "3");
+    println!("Received data: {:?}", &data.cyphertext);
+    let ct_1: Ciphertext = bincode::deserialize(&data.cyphertext)?;
+    println!("Response: {:?}", "4");
+    let result = server_key.unchecked_add(&ct_1, &ct_1);
+    println!("Response: {:?}", "5");
+    let serialized_result = bincode::serialize(&result)?;
+    println!("Response: {:?}", "6");
     let response = AdditionResponse {
-        message: "Data received successfully.".to_string(),
+        cyphertext: serialized_result,
     };
-
+    println!("Response: {:?}", "7");
+    //let response_json = to_string(&response)?;
+    println!("Response: {:?}", response.cyphertext);
     Ok(Json(response))
 }

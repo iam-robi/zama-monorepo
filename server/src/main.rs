@@ -1,8 +1,4 @@
 #[macro_use] extern crate rocket;
-use rocket::{Request, Response};
-use rocket::fairing::{Fairing, Info, Kind};
-use rocket::serde::json::Json;
-use rocket::serde::{Deserialize, Serialize};
 
 
 // pub struct CORS;
