@@ -41,23 +41,10 @@ export default defineEventHandler(async (event) => {
     .catch(function (error) {
       console.log(error);
     });
-    
-
-
-    // await $fetch('http://localhost:8000/serverkey', { method: 'POST', body: { sks: arr , uuid: "ehehhe" },  headers: {
-    //     'Content-Type': 'application/json',
-    //   } } ).then((res) => 
-    //   { 
-    //     console.log(res)
-    //     // keysStore.result_ct = res.cyphertext
-    //   }
-    //   )
-    
-
+  
   
     return {
-    //   sksEncoded: base64String,
-      sksSerialized: "ehehehe",
+      statusCode: 200,
     }
 })
   
