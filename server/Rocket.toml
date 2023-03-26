@@ -7,3 +7,6 @@ port = 8000
 workers = 1
 keep_alive = 0
 log_level = "normal"
+
+[global.limits]
+json = 524288000

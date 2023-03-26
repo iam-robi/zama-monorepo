@@ -7,6 +7,7 @@ use std::io::Cursor;
 
 use rocket::response::{Responder, Response};
 use std::fmt::{self};
+use base64::{decode, DecodeError};
 
 #[derive(Debug)]
 pub struct CustomError(Box<dyn std::error::Error + Send + Sync>);
@@ -26,6 +27,11 @@ impl fmt::Display for CustomError {
 impl From<Box<bincode::ErrorKind>> for CustomError {
 
     fn from(err: Box<bincode::ErrorKind>) -> Self {
+        CustomError(Box::new(err))
+    }
+}
+impl From<DecodeError> for CustomError {
+    fn from(err: DecodeError) -> Self {
         CustomError(Box::new(err))
     }
 }
@@ -53,13 +59,13 @@ pub fn submit_options() -> Status {
 }
 #[post("/submit", format = "json", data = "<data>")]
 pub async fn submit(data: Json<DataForAddition>) -> Result<Json<AdditionResponse>, CustomError>   {
-    println!("Response: {:?}", "1");
-    let mut serialized_data = Cursor::new(&data.sks);
+    let decoded_sks = base64::decode(&data.sks)?;
+    let decoded_cyphertext = base64::decode(&data.cyphertext)?;
     println!("Response: {:?}", "2");
-    let server_key: ServerKey = bincode::deserialize_from(&mut serialized_data)?;
+    let server_key: ServerKey = bincode::deserialize_from(&mut Cursor::new(&decoded_sks))?;
     println!("Response: {:?}", "3");
-    println!("Received data: {:?}", &data.cyphertext);
-    let ct_1: Ciphertext = bincode::deserialize(&data.cyphertext)?;
+
+    let ct_1: Ciphertext = bincode::deserialize(&decoded_cyphertext)?;
     println!("Response: {:?}", "4");
     let result = server_key.unchecked_add(&ct_1, &ct_1);
     println!("Response: {:?}", "5");
@@ -70,6 +76,6 @@ pub async fn submit(data: Json<DataForAddition>) -> Result<Json<AdditionResponse
     };
     println!("Response: {:?}", "7");
     //let response_json = to_string(&response)?;
-    println!("Response: {:?}", response.cyphertext);
+
     Ok(Json(response))
 }

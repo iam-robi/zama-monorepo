@@ -61,9 +61,14 @@ const addToItself = async () => {
   }
   )
 
-  console.log(serverkey)
+  console.log("servrkey", serverkey.sks)
 
-  await $fetch('http://localhost:8000/submit', { method: 'POST', body: { sks: serverkey.sks , cyphertext: keysStore.cyphertext},  headers: {
+  const keyToBase64 = await useEncodeArray(serverkey.sks)
+  const ciphertextb64 = await useEncodeArray(keysStore.cyphertext).base64String
+  console.log("keyToBase64", keyToBase64.base64String)
+  console.log("ciphertextb64", ciphertextb64)
+
+  await $fetch('http://localhost:8000/submit', { method: 'POST', body: { sks: keyToBase64 , cyphertext: ciphertextb64 },  headers: {
     'Content-Type': 'application/json',
   } } ).then((res) => 
   { 
