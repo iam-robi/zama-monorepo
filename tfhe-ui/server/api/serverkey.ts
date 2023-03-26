@@ -14,24 +14,6 @@ export default defineEventHandler(async (event) => {
     let serialized_sks  = Shortint.serialize_compressed_server_key(sks);
     let serialized_ct1 = body.ct1;
 
-    //TODO: support for sks.unchecked_add(sks, ct, ct) or run rust webserver 
-    // console.log("server key serialized")
-    // console.log("encoding server key...")
-    // console.time("encoding")
-    // const CHUNK_SIZE = 82000; // You can adjust this value based on your environment.
-    // let base64String = "";
-  
-    // for (let i = 0; i < serialized_sks.length; i += CHUNK_SIZE) {
-    //   console.log("i", i)
-    //   const arr = Array.from(serialized_sks);
-    //   const slice = arr.slice(i, i + CHUNK_SIZE);
-    //   base64String += btoa(String.fromCharCode.apply(null, slice));  
-    // }
-
-    // console.timeEnd("encoding")
-    // console.log("server key encoded")
-    // let arr = Array.from(serialized_sks);
-    // let ct1arr = Array.from(serialized_ct1);
     let arr = Array.from(serialized_sks);
     let ct1arr = Array.from(serialized_ct1);
     var data = JSON.stringify({
