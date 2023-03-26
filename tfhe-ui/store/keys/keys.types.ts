@@ -4,11 +4,13 @@ type SerializedClientKey = [Uint8Array] & { length: Uint8ArrayLengthClient };
 type Uint8ArrayLengthServer = 24395904;
 type SerializedServerKey = [Uint8Array] & { length: Uint8ArrayLengthServer };
 export interface KeysState {
-    cks: null | BooleanClientKey | ShortintClientKey;
-    sks: null |BooleanPublicKey |ShortintPublicKey;
+    keypairId: null | string;
     serialized_cks: null | SerializedClientKey ;
-    serialized_sks: null | SerializedServerKey ;
-    cyphertext: any;
+    serialized_sks: any ;
+    encoded_cks: null | string ;
+    encoded_sks: null | string ;
+    serializedCiphertext: any;
+    encodedCiphertext: any;
     result: any;
     // result_ct: cyphertext result from operation
     result_ct: any;

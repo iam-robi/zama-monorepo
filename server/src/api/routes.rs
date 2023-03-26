@@ -1,14 +1,15 @@
 use rocket::serde::{json::Json};
-use crate::models::tfhe::{AdditionResponse, DataForAddition};
+use crate::models::tfhe::{StoreServerKey};
 use rocket::http::{ContentType, Status};
 use tfhe::shortint::prelude::*;
 use bincode;
 use std::io::Cursor;
-
+use rocket::form::Form;
+use rocket::fs::TempFile;
 use rocket::response::{Responder, Response};
 use std::fmt::{self};
 use base64::{decode, DecodeError};
-
+use rocket::serde::json::{json, Value};
 #[derive(Debug)]
 pub struct CustomError(Box<dyn std::error::Error + Send + Sync>);
 impl CustomError {
@@ -53,29 +54,64 @@ pub fn index() -> &'static str {
     println!("Response: {:?}", "hey");
     "Front end can query!"
 }
-#[options("/submit")]
-pub fn submit_options() -> Status {
+
+#[derive(FromForm)]
+pub struct Upload<'r> {
+ 
+    uuid: String,
+    file: TempFile<'r>,
+}
+#[post("/upload",  data = "<upload>")]
+pub async fn upload(upload: Form<Upload<'_>>) -> Result<Json<Value>, String>   {
+    println!("Response: {:?}", upload.uuid);
+    //let response_json = to_string(&response)?;
+    Ok(Json(json!({
+        "message": "File uploaded successfully",
+        "uuid": upload.uuid,
+        "size": "file_size",
+    })))
+}
+
+
+
+
+#[options("/serverkey")]
+pub fn serverkey_options() -> Status {
     Status::NoContent
 }
-#[post("/submit", format = "json", data = "<data>")]
-pub async fn submit(data: Json<DataForAddition>) -> Result<Json<AdditionResponse>, CustomError>   {
-    let decoded_sks = base64::decode(&data.sks)?;
-    let decoded_cyphertext = base64::decode(&data.cyphertext)?;
-    println!("Response: {:?}", "2");
-    let server_key: ServerKey = bincode::deserialize_from(&mut Cursor::new(&decoded_sks))?;
-    println!("Response: {:?}", "3");
-
-    let ct_1: Ciphertext = bincode::deserialize(&decoded_cyphertext)?;
-    println!("Response: {:?}", "4");
-    let result = server_key.unchecked_add(&ct_1, &ct_1);
-    println!("Response: {:?}", "5");
-    let serialized_result = bincode::serialize(&result)?;
-    println!("Response: {:?}", "6");
-    let response = AdditionResponse {
-        cyphertext: serialized_result,
+#[post("/serverkey", format = "json", data = "<data>")]
+pub async fn serverkey(data: Json<StoreServerKey>) -> Result<Json<Value>, CustomError>   {
+    
+    println!("uuid: {:?}", data.uuid);
+    println!("ct1 length: {:?}", data.ct1.len());
+    println!("sks length: {:?}", data.sks.len());
+    let mut serialized_data = Cursor::new(&data.sks);
+    println!("sks deserialized: {:?}", &data.sks[0..50]);
+    println!("sks deserialized: {:?}", 1);
+    let server_key: ServerKey = match bincode::deserialize_from(&mut serialized_data) {
+        Ok(key) => {
+            println!("Deserialization successful");
+            key
+        }
+        Err(e) => {
+            println!("Deserialization failed: {}", e);
+            return Err(CustomError(e));
+        }
     };
-    println!("Response: {:?}", "7");
-    //let response_json = to_string(&response)?;
+    println!("sks deserialized: {:?}", 2);
 
-    Ok(Json(response))
+    // println!("sks deserialized: {:?}", 1);
+    // let mut serialized_ct1 = Cursor::new(&data.ct1);
+    // let ct_1: Ciphertext = bincode::deserialize_from(&mut serialized_ct1)?;
+    // println!("ciphertext deserialized: {:?}", 1);
+    // let result = server_key.unchecked_add(&ct_1, &ct_1);
+    // let serialized_result = bincode::serialize(&result)?;
+    // println!("operation finished: {:?}", 1);
+    // println!("Response: {:?}", serialized_result);
+
+    Ok(Json(json!({
+        "message": "File uploaded successfully",
+        "uuid": "request_data.uuid.to_string()",
+        "size": data.uuid,
+    })))
 }

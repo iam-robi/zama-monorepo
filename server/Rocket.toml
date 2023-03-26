@@ -9,4 +9,8 @@ keep_alive = 0
 log_level = "normal"
 
 [global.limits]
-json = 524288000
+json = 5242880000
+# form = 5242880000
+# form-data = 52428800000
+# forms = 5242880000
+file = 5242880000

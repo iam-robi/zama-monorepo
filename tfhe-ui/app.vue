@@ -1,12 +1,12 @@
 <template>
   <div class="wrapper">
     <div class="magicpattern">
-
     <div class="tfhe-app">
     <button @click="keygen" class="generate-key-btn">Generate Key</button>
+    {{ keysStore.keypairId }}
     <div class="key-container">
       <div class="key-box blurred">{{ keysStore.serialized_cks }}</div>
-      <button  @click="download(keysStore.serialized_cks)" class="download-btn">Download</button>
+      <button v-if="keysStore.encoded_cks" @click="download(keysStore.serialized_cks ,'clientkey')" class="download-btn">Download Client Key</button>
     </div>
     <br>
     <h1 style="font-weight:900 ;">Value 1</h1>
@@ -17,12 +17,10 @@
     </div>
     <div > <br> <span style="font-style: italic;">Encrypted value:</span>
       <div class="pre-container">
-      <pre id="preElement" class="encrypted-value"> {{ useEncodeArray(keysStore.cyphertext).base64String }}</pre></div>
-      <!-- <button class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button> -->
+      <pre id="preElement" class="encrypted-value"> {{ keysStore.encodedCiphertext ? keysStore.encodedCiphertext : '' }}</pre></div>
+      
       </div>
-    </div>
-    <div class="encryption-container">
-      <button @click="addToItself" class="encrypt-btn">Send</button>
+      <div style="padding-top: 30px;" class="pre-container"><button @click="genServerKey" class="encrypt-btn">Generate a Server Key (downloads to json)</button></div>
     </div>
     </div>
   </div>
@@ -33,26 +31,32 @@
 import { useKeys } from "~/store/keys/keys.index";
 import useEncodeArray from "~/composables/useEncodeArray";
 import useRevertString from "~/composables/useRevertString";
+
+
+const { computingb64, uint8ArrayToBase64, uint8ArrayToBase64Simple, uint8ArrayToBase64Direct } = useEncodeArray();
+
 const keysStore = useKeys();
 //Operated by client
 const keygen = async () => {
   await $fetch('/api/keygen?message=2&carry=2').then((res) => {
-    console.log(res)
     // keysStore.serialized_sks = res.serverkey
-    keysStore.serialized_cks = res.clientkey
-  })}
+    keysStore.serialized_cks = res.serializedKey
+    keysStore.encoded_cks = res.encodedKey
+    keysStore.keypairId = res.keypairId
+})}
   
 //Operated by client
 const encrypt = async () => {
   await $fetch('/api/encrypt', { method: 'POST', body: { cks: keysStore.serialized_cks, message: 3 } } ).then((res) => 
   {
     console.log(res)
-    keysStore.cyphertext = res.cyphertext
+    keysStore.serializedCiphertext = res.serializedCiphertext
+    keysStore.encodedCiphertext = res.encodedCiphertext
   }
   )
 }
 //Operated by server
-const addToItself = async () => {
+const operation = async () => {
 
   const serverkey = await $fetch('/api/serverkey', { method: 'POST', body: { cks: keysStore.serialized_cks} } ).then((res) => 
   {
@@ -67,6 +71,8 @@ const addToItself = async () => {
   const ciphertextb64 = await useEncodeArray(keysStore.cyphertext).base64String
   console.log("keyToBase64", keyToBase64.base64String)
   console.log("ciphertextb64", ciphertextb64)
+
+
 
   await $fetch('http://localhost:8000/submit', { method: 'POST', body: { sks: keyToBase64 , cyphertext: ciphertextb64 },  headers: {
     'Content-Type': 'application/json',
@@ -85,6 +91,20 @@ const decrypt = async () => {
   })
 }
 
+const genServerKey = async () => {
+  console.log("test")
+  const serverkey = await $fetch('/api/serverkey', { method: 'POST', body: { cks: keysStore.serialized_cks , ct1: keysStore.serializedCiphertext} } ).then((res) => 
+  {
+    console.log("serverkey generated")
+    // keysStore.serialized_sks = res.sksSerialized
+    // download(res.sksSerialized, "serverkey")
+    // sendData(res.sksSerialized)
+    return res
+  }
+  )
+
+
+}
 onMounted(async () => {
   console.log("mounted")
   $fetch('http://localhost:8000').then((res) => {
@@ -92,26 +112,57 @@ onMounted(async () => {
   })
 });
 
-const download = (arr) => {
+const download = (uint8Array, filename) => {
       
-      // Convert uint8 array to base64 encoded string
-      const base64String = btoa(String.fromCharCode.apply(null, arr));
+  // Convert Uint8Array to an array of numbers
+  const numberArray = Array.from(uint8Array);
 
-      // Create a Blob object with the base64-encoded string as its content
-      const mimeType = 'application/octet-stream';
-      const blob = new Blob([atob(base64String)], { type: mimeType });
+  // Stringify the array
+  const jsonString = JSON.stringify(numberArray, null, 2);
 
-      // Generate a URL for the Blob object
-      const url = URL.createObjectURL(blob);
+  // Create a Blob object with the JSON string as its content
+  const mimeType = 'application/json';
+  const blob = new Blob([jsonString], { type: mimeType });
 
-      // Trigger the download using an anchor element with the `download` attribute
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = 'key.txt';
-      anchor.click();
+  // Generate a URL for the Blob object
+  const url = URL.createObjectURL(blob);
 
-      // Clean up the URL object after download
-      URL.revokeObjectURL(url);
+  // Trigger the download using an anchor element with the `download` attribute
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${filename}.json`;
+  anchor.click();
+
+  // Clean up the URL object after download
+  URL.revokeObjectURL(url);
+}
+
+const sendData = async (sks, ciphertext) => {
+  // const arr = Array.from(sks);
+  // const blob = new Blob([arr.buffer], { type: 'application/octet-stream' });
+
+  // const formData = new FormData();
+  // formData.append('save', true);
+  // formData.append('file', blob, 'file.bin');
+
+  // await $fetch('http://localhost:8000/upload', { method: 'POST', body: formData } ).then((res) => 
+  // {
+  //   console.log(res)
+  //   // eé   
+  // }
+  // )
+
+  const arr = Array.from(sks);
+  // const cipherArr = Array.from(ciphertext);
+
+  // await $fetch('http://localhost:8000/serverkey', { method: 'POST', body: { sks: arr , uuid: "ehehhe" },  headers: {
+  //   'Content-Type': 'application/json',
+  // } } ).then((res) => 
+  // { 
+  //   console.log(res)
+  //   // keysStore.result_ct = res.cyphertext
+  // }
+  // )
 }
 
 </script>
