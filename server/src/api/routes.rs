@@ -1,7 +1,7 @@
 use rocket::serde::{json::Json};
 use crate::models::tfhe::{StoreServerKey};
 use rocket::http::{ContentType, Status};
-use tfhe::shortint::prelude::*;
+use tfhe::shortint::{prelude::*, CompressedServerKey};
 use bincode;
 use std::io::Cursor;
 use rocket::form::Form;
@@ -82,13 +82,12 @@ pub fn serverkey_options() -> Status {
 #[post("/serverkey", format = "json", data = "<data>")]
 pub async fn serverkey(data: Json<StoreServerKey>) -> Result<Json<Value>, CustomError>   {
     
-    println!("uuid: {:?}", data.uuid);
     println!("ct1 length: {:?}", data.ct1.len());
     println!("sks length: {:?}", data.sks.len());
     let mut serialized_data = Cursor::new(&data.sks);
-    println!("sks deserialized: {:?}", &data.sks[0..50]);
-    println!("sks deserialized: {:?}", 1);
-    let server_key: ServerKey = match bincode::deserialize_from(&mut serialized_data) {
+    println!("sks first 50: {:?}", &data.sks[0..50]);
+    println!("curso set {:?}", "");
+    let compressed_server_key: CompressedServerKey = match bincode::deserialize_from(&mut serialized_data){
         Ok(key) => {
             println!("Deserialization successful");
             key
@@ -98,6 +97,8 @@ pub async fn serverkey(data: Json<StoreServerKey>) -> Result<Json<Value>, Custom
             return Err(CustomError(e));
         }
     };
+
+    let server_key: ServerKey = ServerKey::from(compressed_server_key);
     println!("sks deserialized: {:?}", 2);
 
     // println!("sks deserialized: {:?}", 1);
