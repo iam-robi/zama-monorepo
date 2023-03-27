@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
 
     var config = {
       method: 'post',
-    maxBodyLength: Infinity,
+      maxBodyLength: Infinity,
       url: 'http://127.0.0.1:8000/serverkey',
       headers: { 
         'Content-Type': 'application/json',
